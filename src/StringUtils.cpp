@@ -1,103 +1,164 @@
 #include "StringUtils.h"
 #include <cctype>
 
-namespace StringUtils{
+namespace StringUtils
+{
 
-std::string Slice(const std::string &str, ssize_t start, ssize_t end) noexcept{
-    // Replace code here
-    return "";
-}
-
-std::string Capitalize(const std::string &str) noexcept{
-    // Replace code here
-    std::string Temp = str;
-    if(!Temp.empty()){
-        Temp[0] = toupper(Temp[0]);
-        for(size_t Index = 1; Index < Temp.length(); Index++){
-            Temp[Index] = tolower(Temp[Index]);
-        }
-    }
-    return Temp;
-}
-
-std::string Upper(const std::string &str) noexcept{
-    // Replace code here
-    return "";
-}
-
-std::string Lower(const std::string &str) noexcept{
-    // Replace code here
-    return "";
-}
-
-std::string LStrip(const std::string &str) noexcept{
-    std::string Temp = str;
-    size_t Index = 0;
-    size_t Length = Temp.length();
-    while((Index < Length) && isspace(Temp[Index])){
-        Index++;
+    std::string Slice(const std::string &str, ssize_t start, ssize_t end) noexcept
+    {
+        // Replace code here
+        return "";
     }
 
-    return Temp.substr(Index);
-}
-
-std::string RStrip(const std::string &str) noexcept{
-    std::string Temp = str;
-    if(!Temp.empty()){
-        size_t Index = Temp.length()-1;
-        while(isspace(Temp[Index])){
-            if(!Index){
-                return "";
+    std::string Capitalize(const std::string &str) noexcept
+    {
+        // Replace code here
+        std::string Temp = str;
+        if (!Temp.empty())
+        {
+            Temp[0] = toupper(Temp[0]);
+            for (size_t Index = 1; Index < Temp.length(); Index++)
+            {
+                Temp[Index] = tolower(Temp[Index]);
             }
-            Index--;
         }
-        return Temp.substr(0,Index+1);
+        return Temp;
     }
-    return "";
-}
 
-std::string Strip(const std::string &str) noexcept{
-    return LStrip(RStrip(str));
-}
+    std::string Upper(const std::string &str) noexcept
+    {
+        // Replace code here
+        return "";
+    }
 
-std::string Center(const std::string &str, int width, char fill) noexcept{
-    // Replace code here
-    return "";
-}
+    std::string Lower(const std::string &str) noexcept
+    {
+        // Replace code here
+        return "";
+    }
 
-std::string LJust(const std::string &str, int width, char fill) noexcept{
-    // Replace code here
-    return "";
-}
+    std::string LStrip(const std::string &str) noexcept
+    {
+        std::string Temp = str;
+        size_t Index = 0;
+        size_t Length = Temp.length();
+        while ((Index < Length) && isspace(Temp[Index]))
+        {
+            Index++;
+        }
 
-std::string RJust(const std::string &str, int width, char fill) noexcept{
-    // Replace code here
-    return "";
-}
+        return Temp.substr(Index);
+    }
 
-std::string Replace(const std::string &str, const std::string &old, const std::string &rep) noexcept{
-    // Replace code here
-    return "";
-}
+    std::string RStrip(const std::string &str) noexcept
+    {
+        std::string Temp = str;
+        if (!Temp.empty())
+        {
+            size_t Index = Temp.length() - 1;
+            while (isspace(Temp[Index]))
+            {
+                if (!Index)
+                {
+                    return "";
+                }
+                Index--;
+            }
+            return Temp.substr(0, Index + 1);
+        }
+        return "";
+    }
 
-std::vector< std::string > Split(const std::string &str, const std::string &splt) noexcept{
-    // Replace code here
-    return {};
-}
+    std::string Strip(const std::string &str) noexcept
+    {
+        return LStrip(RStrip(str));
+    }
 
-std::string Join(const std::string &str, const std::vector< std::string > &vect) noexcept{
-    // Replace code here
-    return "";
-}
+    std::string Center(const std::string &str, int width, char fill) noexcept
+    {
+        // Replace code here
+        return "";
+    }
 
-std::string ExpandTabs(const std::string &str, int tabsize) noexcept{
-    // Replace code here
-    return "";
-}
+    std::string LJust(const std::string &str, int width, char fill) noexcept
+    {
+        // Replace code here
+        return "";
+    }
 
-int EditDistance(const std::string &left, const std::string &right, bool ignorecase) noexcept{
-    // Replace code here
-    return 0;
-}
+    std::string RJust(const std::string &str, int width, char fill) noexcept
+    {
+        // Replace code here
+        return "";
+    }
+
+    std::string Replace(const std::string &str, const std::string &old, const std::string &rep) noexcept
+    {
+        // Replace code here
+        return "";
+    }
+
+    std::vector<std::string> Split(const std::string &str, const std::string &splt) noexcept
+    {
+        std::vector<std::string> results;
+        if (splt.empty())
+        {
+            std::string current;
+            for (char c : str)
+            {
+                if (std::isspace(c))
+                {
+                    if (!current.empty())
+                    {
+                        results.push_back(current);
+                        current.clear();
+                    }
+                }
+                else
+                {
+                    current += c;
+                }
+            }
+            if (!current.empty())
+                results.push_back(current);
+        }
+        else
+        {
+            size_t start = 0;
+            size_t end = str.find_first_of(splt);
+            while (end != std::string::npos)
+            {
+                if (end != start)
+                { // prevent empty string unless explicitly wanted? In split typically we want them if consecutive delimiters maybe? But for commands it's usually skipped. Let's match original expected behavior, skip empty
+                    results.push_back(str.substr(start, end - start));
+                }
+                start = end + 1;
+                end = str.find_first_of(splt, start);
+            }
+            if (start < str.length())
+            { // grab the last token
+                results.push_back(str.substr(start));
+            }
+        }
+        return results;
+    }
+
+    std::string Join(const std::string &str, const std::vector<std::string> &vect) noexcept
+    {
+        // Replace code here
+        return "";
+    }
+
+    std::string ExpandTabs(const std::string &str, int tabsize) noexcept
+    {
+        // Replace code here
+        return "";
+    }
+
+    int EditDistance(const std::string &left, const std::string &right, bool ignorecase) noexcept
+    {
+        // Replace code here
+        return 0;
+    }
 
 };

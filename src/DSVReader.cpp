@@ -4,78 +4,95 @@
 using std::cout;
 using std::endl;
 
-struct CDSVReader::SImplementation{
+struct CDSVReader::SImplementation
+{
     std::shared_ptr<CDataSource> DSource;
     char DDelimiter;
 
-    SImplementation(std::shared_ptr< CDataSource > src, char delimiter){
+    SImplementation(std::shared_ptr<CDataSource> src, char delimiter)
+    {
         DSource = src;
         DDelimiter = delimiter;
     }
 
-    bool ParseValue(std::string &val){
+    bool ParseValue(std::string &val)
+    {
         bool InQuotes = false;
         val.clear();
-cout<<"IN "<<__FILE__<<" @ "<<__LINE__<<endl;
-        while(!DSource->End()){
-cout<<"IN "<<__FILE__<<" @ "<<__LINE__<<endl;
+        bool charsRead = false;
+        while (!DSource->End())
+        {
             char NextChar;
             DSource->Peek(NextChar);
-            if(!InQuotes &&((NextChar == DDelimiter)||(NextChar == '\n'))){
-                DSource->Get(NextChar);
-cout<<"IN "<<__FILE__<<" @ "<<__LINE__<<endl;
+            if (!InQuotes && ((NextChar == DDelimiter) || (NextChar == '\n')))
+            {
                 return true;
             }
-            if(NextChar == '\"' && !InQuotes){
+            if (NextChar == '\"' && !InQuotes)
+            {
                 InQuotes = true;
             }
-            else{
-                val += std::string(1,NextChar);
+            else
+            {
+                val += std::string(1, NextChar);
+                charsRead = true;
             }
             DSource->Get(NextChar);
         }
-        return false;
+        return charsRead || InQuotes;
     }
 
-    bool End() const{
-        return false;
+    bool End() const
+    {
+        return DSource->End();
     }
 
-    bool ReadRow(std::vector<std::string> &row){
-        cout<<"IN "<<__FILE__<<" @ "<<__LINE__<<endl;
-        while(!DSource->End()){
-            cout<<"IN "<<__FILE__<<" @ "<<__LINE__<<endl;
+    bool ReadRow(std::vector<std::string> &row)
+    {
+        row.clear();
+        if (DSource->End())
+            return false;
+
+        while (!DSource->End())
+        {
             std::string NextValue;
-            if(ParseValue(NextValue)){
-                row.push_back(NextValue);
-                char NextChar;
-                DSource->Peek(NextChar);
-                if(NextChar == '\n'){
-                    // consume
-                    return true;
-                }
-            }
-            else{
+            ParseValue(NextValue);
+            row.push_back(NextValue);
+
+            char NextChar;
+            if (DSource->End())
                 break;
+
+            DSource->Peek(NextChar);
+            if (NextChar == DDelimiter)
+            {
+                DSource->Get(NextChar); // Consume delimiter
+            }
+            else if (NextChar == '\n')
+            {
+                DSource->Get(NextChar); // Consume newline
+                return true;
             }
         }
-        return false;
+        return !row.empty();
     }
-
 };
-        
-CDSVReader::CDSVReader(std::shared_ptr< CDataSource > src, char delimiter){
-    DImplementation = std::make_unique<SImplementation>(src,delimiter);
+
+CDSVReader::CDSVReader(std::shared_ptr<CDataSource> src, char delimiter)
+{
+    DImplementation = std::make_unique<SImplementation>(src, delimiter);
 }
 
-CDSVReader::~CDSVReader(){
-
+CDSVReader::~CDSVReader()
+{
 }
 
-bool CDSVReader::End() const{
+bool CDSVReader::End() const
+{
     return DImplementation->End();
 }
 
-bool CDSVReader::ReadRow(std::vector<std::string> &row){
+bool CDSVReader::ReadRow(std::vector<std::string> &row)
+{
     return DImplementation->ReadRow(row);
 }
