@@ -1,9 +1,5 @@
 #include "DSVReader.h"
 
-#include <iostream>
-using std::cout;
-using std::endl;
-
 struct CDSVReader::SImplementation{
     std::shared_ptr<CDataSource> DSource;
     char DDelimiter;
@@ -16,50 +12,64 @@ struct CDSVReader::SImplementation{
     bool ParseValue(std::string &val){
         bool InQuotes = false;
         val.clear();
-cout<<"IN "<<__FILE__<<" @ "<<__LINE__<<endl;
+
         while(!DSource->End()){
-cout<<"IN "<<__FILE__<<" @ "<<__LINE__<<endl;
             char NextChar;
             DSource->Peek(NextChar);
             if(!InQuotes &&((NextChar == DDelimiter)||(NextChar == '\n'))){
-                DSource->Get(NextChar);
-cout<<"IN "<<__FILE__<<" @ "<<__LINE__<<endl;
                 return true;
             }
-            if(NextChar == '\"' && !InQuotes){
-                InQuotes = true;
+            DSource->Get(NextChar); // Actually consume the character
+            if(NextChar == '\"'){
+                if(InQuotes){
+                    char PeekChar;
+                    if(!DSource->End() && DSource->Peek(PeekChar) && (PeekChar == '\"')){
+                        DSource->Get(NextChar); // Consume second quote
+                        val += '\"';
+                    }
+                    else{
+                        InQuotes = false;
+                    }
+                }
+                else{
+                    InQuotes = true;
+                }
             }
             else{
-                val += std::string(1,NextChar);
+                val += NextChar;
             }
-            DSource->Get(NextChar);
         }
-        return false;
+        return !val.empty() || InQuotes; // Return true if we read something or were in quotes
     }
 
     bool End() const{
-        return false;
+        return DSource->End();
     }
 
     bool ReadRow(std::vector<std::string> &row){
-        cout<<"IN "<<__FILE__<<" @ "<<__LINE__<<endl;
+        row.clear();
         while(!DSource->End()){
-            cout<<"IN "<<__FILE__<<" @ "<<__LINE__<<endl;
             std::string NextValue;
             if(ParseValue(NextValue)){
                 row.push_back(NextValue);
+                if(DSource->End()){
+                    return true;
+                }
                 char NextChar;
                 DSource->Peek(NextChar);
                 if(NextChar == '\n'){
-                    // consume
+                    DSource->Get(NextChar); // Consume newline
                     return true;
+                }
+                else if(NextChar == DDelimiter){
+                    DSource->Get(NextChar); // Consume delimiter
                 }
             }
             else{
                 break;
             }
         }
-        return false;
+        return !row.empty();
     }
 
 };

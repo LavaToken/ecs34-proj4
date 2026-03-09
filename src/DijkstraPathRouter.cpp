@@ -54,9 +54,8 @@ struct CDijkstraPathRouter::SImplementation{
         Weights.resize(DVertices.size(),std::numeric_limits<double>::max());
         std::vector<TVertexID> Previous;
         Previous.resize(DVertices.size(),std::numeric_limits<TVertexID>::max());
+        //djikstras
         
-
-
 
     }
 };
@@ -65,7 +64,7 @@ CDijkstraPathRouter::CDijkstraPathRouter(){
     DImplementation = std::make_unique<SImplementation>();
 }
 
-CDijkstraPathRouter::~CDijkstraPathRouter(){
+CDijkstraPathRouter::~CDijkstraPathRouter(){ 
 
 }
 
