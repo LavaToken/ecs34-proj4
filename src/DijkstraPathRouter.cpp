@@ -92,7 +92,7 @@ struct CDijkstraPathRouter::SImplementation{
                 }
                 TVertexID v = static_cast<TVertexID>(std::distance(DVertices.begin(), it));
                 double alt = Weights[u] + edge.first;
-                if(alt < Weights[v]){
+                if(alt <= Weights[v]){
                     Weights[v] = alt;
                     Previous[v] = u;
                 }

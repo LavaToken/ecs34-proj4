@@ -17,7 +17,7 @@ struct COpenStreetMap::SImplementation{
 
     struct SNode: public CStreetMap::SNode{
         TNodeID DID;
-        TLocation DLocation;
+        SLocation DLocation;
         std::vector<std::string> DAttributeKeys;
         std::unordered_map<std::string, std::string> DAttributes;
 
@@ -26,7 +26,7 @@ struct COpenStreetMap::SImplementation{
             return DID;
         }
 
-        TLocation Location() const noexcept override{
+        SLocation Location() const noexcept override{
             return DLocation;
         }
 
@@ -128,7 +128,8 @@ struct COpenStreetMap::SImplementation{
                     auto NodeLon = std::stod(nextentity.AttributeValue(DNodeLonAttr));
                     auto NewNode = std::make_shared<SNode>();
                     NewNode->DID = NodeID;
-                    NewNode->DLocation = std::make_pair(NodeLat,NodeLon);
+                    //NewNode->DLocation = std::make_pair(NodeLat,NodeLon);
+                    NewNode->DLocation = CStreetMap::SLocation(NodeLat,NodeLon);
                     
                     // Possible attributes (tags)
                     SXMLEntity TagEntity;

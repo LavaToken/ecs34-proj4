@@ -109,7 +109,7 @@ TEST(DijkstraPathRouter, WorseDirectPathTest){
     EXPECT_TRUE(PathRouter.AddEdge(VertexA,VertexC,1.0));
     EXPECT_TRUE(PathRouter.AddEdge(VertexC,VertexB,1.0));
     std::vector<CPathRouter::TVertexID> Path;
-    EXPECT_EQ(PathRouter.FindShortestPath(VertexA,VertexB,Path), 1.0);
+    EXPECT_EQ(PathRouter.FindShortestPath(VertexA,VertexB,Path), 2.0);
     std::vector<CPathRouter::TVertexID> ExpectedPath{VertexA,VertexC,VertexB};
     EXPECT_EQ(Path,ExpectedPath);
 }

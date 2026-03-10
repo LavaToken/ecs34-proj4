@@ -13,6 +13,7 @@ The project fails to function properly in ...
 ## Code References
 * [Different ways to initialize variables](https://stackoverflow.com/questions/22543875/different-ways-to-initialize-variables)
 * [Dijkstra's Algorithm Explanation](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
+* [Dijkstra's with Priority Queue(just video reference example)](https://www.youtube.com/watch?v=CerlT7tTZfY)
 
 ## Generative AI Use
 I used ChatGPT for Prompt 1, and ZZZZZ for Prompt 2....

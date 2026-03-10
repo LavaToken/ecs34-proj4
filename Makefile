@@ -53,7 +53,7 @@ TEST_OSM_TARGET	= $(TESTBIN_DIR)/testosm
 TEST_DPR_TARGET = $(TESTBIN_DIR)/testdijkstrapathrouter
 
 
-all: directories \
+all: clean directories \
 		run_dprtest		\
 		run_strtest \
 		run_strsrctest \
@@ -79,7 +79,7 @@ run_strsinktest: $(TEST_STRSINK_TARGET)
 	mv $(TESTTMP_DIR)/$@ $@
 
 run_filesstest: $(TEST_FILESS_TARGET)
-    $(TEST_FILESS_TARGET) --gtest_output=xml:$(TESTTMP_DIR)/$@
+	$(TEST_FILESS_TARGET) --gtest_output=xml:$(TESTTMP_DIR)/$@
 	mv $(TESTTMP_DIR)/$@ $@
 
 run_geoutilstest: $(TEST_GEOUTILS_TARGET)
@@ -111,7 +111,7 @@ run_dprtest: $(TEST_DPR_TARGET)
 	mv $(TESTTMP_DIR)/$@ $@
 
 gencoverage:
-	lcov --capture --directory . --output-file $(TESTCOVER_DIR)/coverage.info --ignore-errors inconsistent,source
+	lcov --capture --directory . --output-file $(TESTCOVER_DIR)/coverage.info --ignore-errors inconsistent,source,count
 	lcov --remove $(TESTCOVER_DIR)/coverage.info '/usr/*' '*/testsrc/*' --output-file $(TESTCOVER_DIR)/coverage.info
 	genhtml $(TESTCOVER_DIR)/coverage.info --output-directory $(TESTCOVER_DIR)
 

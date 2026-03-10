@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="8" failures="0" disabled="0" errors="0" time="0." timestamp="2026-03-10T01:33:53.017" name="AllTests">
+  <testsuite name="DijkstraPathRouter" tests="8" failures="0" disabled="0" skipped="0" errors="0" time="0." timestamp="2026-03-10T01:33:53.017">
+    <testcase name="SimpleTest" file="testsrc/DijkstraPathRouterTest.cpp" line="4" status="run" result="completed" time="0." timestamp="2026-03-10T01:33:53.017" classname="DijkstraPathRouter" />
+    <testcase name="ShortestPath" file="testsrc/DijkstraPathRouterTest.cpp" line="15" status="run" result="completed" time="0." timestamp="2026-03-10T01:33:53.017" classname="DijkstraPathRouter" />
+    <testcase name="SingleNodeTest" file="testsrc/DijkstraPathRouterTest.cpp" line="42" status="run" result="completed" time="0." timestamp="2026-03-10T01:33:53.017" classname="DijkstraPathRouter" />
+    <testcase name="DisconnectedGraphTest" file="testsrc/DijkstraPathRouterTest.cpp" line="53" status="run" result="completed" time="0." timestamp="2026-03-10T01:33:53.017" classname="DijkstraPathRouter" />
+    <testcase name="MultipleShortestPathTest" file="testsrc/DijkstraPathRouterTest.cpp" line="83" status="run" result="completed" time="0." timestamp="2026-03-10T01:33:53.017" classname="DijkstraPathRouter" />
+    <testcase name="WorseDirectPathTest" file="testsrc/DijkstraPathRouterTest.cpp" line="102" status="run" result="completed" time="0." timestamp="2026-03-10T01:33:53.017" classname="DijkstraPathRouter" />
+    <testcase name="ZeroWeightEdgesTest" file="testsrc/DijkstraPathRouterTest.cpp" line="119" status="run" result="completed" time="0." timestamp="2026-03-10T01:33:53.017" classname="DijkstraPathRouter" />
+    <testcase name="NegativeWeightEdgesTest" file="testsrc/DijkstraPathRouterTest.cpp" line="133" status="run" result="completed" time="0." timestamp="2026-03-10T01:33:53.017" classname="DijkstraPathRouter" />
+  </testsuite>
+</testsuites>
