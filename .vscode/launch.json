@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/admin/ecs34/ecs34-proj4/src",
+      "program": "/Users/admin/ecs34/ecs34-proj4/src/build/Debug/outDebug"
+    }
+  ]
+}

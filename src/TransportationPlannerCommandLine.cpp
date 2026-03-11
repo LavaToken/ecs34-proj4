@@ -88,11 +88,11 @@ struct CTransportationPlannerCommandLine::SImplementation{
                                         int lat_d = int(Loc.DLatitude);
                                         int lat_m = int((Loc.DLatitude - lat_d) * 60.0);
                                         int lat_s = int(std::round(((Loc.DLatitude - lat_d) * 60.0 - lat_m) * 60.0));
-                                        std::string lat_dir = "N"; // simplified, assuming positive for test
+                                        std::string lat_dir = "N"; 
                                         int lon_d = int(std::abs(Loc.DLongitude));
                                         int lon_m = int((std::abs(Loc.DLongitude) - lon_d) * 60.0);
                                         int lon_s = int(std::round(((std::abs(Loc.DLongitude) - lon_d) * 60.0 - lon_m) * 60.0));
-                                        std::string lon_dir = "W"; // simplified, assuming negative for test
+                                        std::string lon_dir = "W"; 
 
                                         std::string Out = "Node " + std::to_string(index) + ": id = " + std::to_string(Node->ID()) + 
                                                           " is at " + std::to_string(lat_d) + "d " + std::to_string(lat_m) + "' " + std::to_string(lat_s) + "\" " + lat_dir + 
@@ -197,7 +197,18 @@ struct CTransportationPlannerCommandLine::SImplementation{
                                 }
                             }
                         } else if (LastWasShortest && !LastShortestPath.empty()) {
-                            // Can't get description for shortest path directly, it takes TTripStep
+                            std::vector<CTransportationPlanner::TTripStep> steps;
+                            for (auto nodeID : LastShortestPath) {
+                                steps.push_back({CTransportationPlanner::ETransportationMode::Walk, nodeID});
+                            }
+                            std::vector<std::string> desc;
+                            if (DPlanner->GetPathDescription(steps, desc)) {
+                                for(auto line : desc){
+                                    std::string Out = line + "\n";
+                                    auto OutVec = std::vector<char>(Out.begin(), Out.end());
+                                    DOutSink->Write(OutVec);
+                                }
+                            }
                         } else {
                             std::string Out = "No valid path to print, see help.\n";
                             auto OutVec = std::vector<char>(Out.begin(), Out.end());
@@ -213,7 +224,6 @@ struct CTransportationPlannerCommandLine::SImplementation{
                                     timeStr.pop_back();
                                 }
                                 if (timeStr.find('.') + 7 > timeStr.size()) {
-                                    // ensure precision aligns with test expectations
                                     auto idx = timeStr.find("hr.csv");
                                     std::string precision = timeStr.substr(0, idx);
                                     if(precision.find('.') != std::string::npos) {
@@ -224,7 +234,6 @@ struct CTransportationPlannerCommandLine::SImplementation{
                                     }
                                 }
                             }
-                            // actually `TPCommandLineTest` expects exact 6 decimals since it's `1.375000`
                             std::ostringstream fs;
                             fs << LastFastestSrc << "_" << LastFastestDest << "_" << std::fixed << std::setprecision(6) << LastFastestTime << "hr.csv";
                             
@@ -241,6 +250,25 @@ struct CTransportationPlannerCommandLine::SImplementation{
                                     else if (step.first == CTransportationPlanner::ETransportationMode::Bus) ModeStr = "Bus";
                                     std::string LineOut = ModeStr + "," + std::to_string(step.second);
                                     if (i + 1 < LastFastestPath.size()) LineOut += "\n";
+                                    auto LineVec = std::vector<char>(LineOut.begin(), LineOut.end());
+                                    Sink->Write(LineVec);
+                                }
+                                std::string Out = "Path saved to <results>/" + Filename + "\n";
+                                auto OutVec = std::vector<char>(Out.begin(), Out.end());
+                                DOutSink->Write(OutVec);
+                            }
+                        } else if (LastWasShortest && !LastShortestPath.empty()) {
+                            std::ostringstream fs;
+                            fs << LastShortestSrc << "_" << LastShortestDest << "_" << std::fixed << std::setprecision(6) << LastShortestDistance << "mi.csv";
+                            std::string Filename = fs.str();
+                            auto Sink = DResults->CreateSink(Filename);
+                            if (Sink) {
+                                std::string Header = "mode,node_id\n";
+                                auto HeaderVec = std::vector<char>(Header.begin(), Header.end());
+                                Sink->Write(HeaderVec);
+                                for(size_t i = 0; i < LastShortestPath.size(); ++i){
+                                    std::string LineOut = "Walk," + std::to_string(LastShortestPath[i]);
+                                    if (i + 1 < LastShortestPath.size()) LineOut += "\n";
                                     auto LineVec = std::vector<char>(LineOut.begin(), LineOut.end());
                                     Sink->Write(LineVec);
                                 }
@@ -265,7 +293,6 @@ struct CTransportationPlannerCommandLine::SImplementation{
             }
         }
         
-        // if EOF without newline, process what's left
         if (!Buffer.empty()) {
             std::string Line(Buffer.begin(), Buffer.end());
             auto Tokens = StringUtils::Split(Line, " \t\r");

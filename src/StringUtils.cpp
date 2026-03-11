@@ -160,5 +160,4 @@ namespace StringUtils
         // Replace code here
         return 0;
     }
-
 };
