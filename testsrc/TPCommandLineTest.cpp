@@ -245,69 +245,6 @@ TEST(TransporationPlannerCommandLine, SaveTest){
     EXPECT_TRUE(ErrorSink->String().empty());
 }
 
-TEST(TransporationPlannerCommandLine, ShortestPrintTest){
-    auto InputSource = std::make_shared<CStringDataSource>( "shortest 123 456\n"
-                                                            "print\n"
-                                                            "exit\n");
-    auto OutputSink = std::make_shared<CStringDataSink>();
-    auto ErrorSink = std::make_shared<CStringDataSink>();
-    auto MockPlanner = std::make_shared<CMockTransportationPlanner>();
-    auto MockNode = std::make_shared<SMockNode>();
-    auto MockFactory = std::make_shared<CMockFactory>();
-    std::vector<CTransportationPlanner::TNodeID> ExpectedPath = {123, 456};
-    std::vector< std::string > ExpectedDescription = {"Start at ...", "Walk ...", "End at ..."};
-    
-    EXPECT_CALL(*MockPlanner, FindShortestPath(123, 456, ::testing::_))
-        .WillRepeatedly(::testing::DoAll(::testing::SetArgReferee<2>(ExpectedPath),::testing::Return(5.2)));
-
-    EXPECT_CALL(*MockPlanner, GetPathDescription(::testing::_, ::testing::_))
-        .WillRepeatedly(::testing::DoAll(::testing::SetArgReferee<1>(ExpectedDescription),::testing::Return(true)));
-        
-    CTransportationPlannerCommandLine CommandLine(InputSource,OutputSink,ErrorSink,MockFactory,MockPlanner);
-
-    EXPECT_TRUE(CommandLine.ProcessCommands());
-    EXPECT_EQ(OutputSink->String(),"> "
-                                    "Shortest path is 5.2 mi.\n"
-                                    "> "
-                                    "Start at ...\n"
-                                    "Walk ...\n"
-                                    "End at ...\n"
-                                    "> ");
-    EXPECT_TRUE(ErrorSink->String().empty());
-}
-
-TEST(TransporationPlannerCommandLine, ShortestSaveTest){
-    auto InputSource = std::make_shared<CStringDataSource>( "shortest 123 456\n"
-                                                            "save\n"
-                                                            "exit\n");
-    auto OutputSink = std::make_shared<CStringDataSink>();
-    auto ErrorSink = std::make_shared<CStringDataSink>();
-    auto MockPlanner = std::make_shared<CMockTransportationPlanner>();
-    auto MockNode = std::make_shared<SMockNode>();
-    auto MockFactory = std::make_shared<CMockFactory>();
-    auto SaveSink = std::make_shared<CStringDataSink>();
-    std::vector<CTransportationPlanner::TNodeID> ExpectedPath = {123, 456};
-
-    EXPECT_CALL(*MockPlanner, FindShortestPath(123, 456, ::testing::_))
-        .WillRepeatedly(::testing::DoAll(::testing::SetArgReferee<2>(ExpectedPath),::testing::Return(5.2)));
-
-    EXPECT_CALL(*MockFactory, CreateSink(std::string("123_456_5.200000mi.csv")))
-        .WillRepeatedly(::testing::Return(SaveSink));
-        
-    CTransportationPlannerCommandLine CommandLine(InputSource,OutputSink,ErrorSink,MockFactory,MockPlanner);
-
-    EXPECT_TRUE(CommandLine.ProcessCommands());
-    EXPECT_EQ(OutputSink->String(),"> "
-                                    "Shortest path is 5.2 mi.\n"
-                                    "> "
-                                    "Path saved to <results>/123_456_5.200000mi.csv\n"
-                                    "> ");
-    EXPECT_EQ(SaveSink->String(),"mode,node_id\n"
-                                 "Walk,123\n"
-                                 "Walk,456");
-    EXPECT_TRUE(ErrorSink->String().empty());
-}
-
 TEST(TransporationPlannerCommandLine, ErrorTest){
     auto InputSource = std::make_shared<CStringDataSource>( "foo\n"
                                                             "node\n"

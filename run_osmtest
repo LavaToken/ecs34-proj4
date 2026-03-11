@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="15" failures="0" disabled="0" errors="0" time="0." timestamp="2026-03-10T01:34:19.108" name="AllTests">
-  <testsuite name="OSMTest" tests="15" failures="0" disabled="0" skipped="0" errors="0" time="0." timestamp="2026-03-10T01:34:19.108">
-    <testcase name="SimpleFiles" file="testsrc/OpenStreetMapTest.cpp" line="5" status="run" result="completed" time="0." timestamp="2026-03-10T01:34:19.108" classname="OSMTest" />
-    <testcase name="ObscureFiles" file="testsrc/OpenStreetMapTest.cpp" line="34" status="run" result="completed" time="0." timestamp="2026-03-10T01:34:19.108" classname="OSMTest" />
-    <testcase name="EmptyFiles" file="testsrc/OpenStreetMapTest.cpp" line="62" status="run" result="completed" time="0." timestamp="2026-03-10T01:34:19.108" classname="OSMTest" />
-    <testcase name="NoNodesOrWaysFile" file="testsrc/OpenStreetMapTest.cpp" line="77" status="run" result="completed" time="0." timestamp="2026-03-10T01:34:19.108" classname="OSMTest" />
-    <testcase name="NodesOnlyFile" file="testsrc/OpenStreetMapTest.cpp" line="92" status="run" result="completed" time="0." timestamp="2026-03-10T01:34:19.108" classname="OSMTest" />
-    <testcase name="WaysOnlyFile" file="testsrc/OpenStreetMapTest.cpp" line="122" status="run" result="completed" time="0." timestamp="2026-03-10T01:34:19.108" classname="OSMTest" />
-    <testcase name="DuplicateNodesFile" file="testsrc/OpenStreetMapTest.cpp" line="141" status="run" result="completed" time="0." timestamp="2026-03-10T01:34:19.108" classname="OSMTest" />
-    <testcase name="ExactValuesFile" file="testsrc/OpenStreetMapTest.cpp" line="157" status="run" result="completed" time="0." timestamp="2026-03-10T01:34:19.108" classname="OSMTest" />
-    <testcase name="LotsOfWhiteSpace" file="testsrc/OpenStreetMapTest.cpp" line="175" status="run" result="completed" time="0." timestamp="2026-03-10T01:34:19.108" classname="OSMTest" />
-    <testcase name="NodeAttributes" file="testsrc/OpenStreetMapTest.cpp" line="196" status="run" result="completed" time="0." timestamp="2026-03-10T01:34:19.108" classname="OSMTest" />
-    <testcase name="WayAttributes" file="testsrc/OpenStreetMapTest.cpp" line="216" status="run" result="completed" time="0." timestamp="2026-03-10T01:34:19.108" classname="OSMTest" />
-    <testcase name="SelfInteractFile" file="testsrc/OpenStreetMapTest.cpp" line="234" status="run" result="completed" time="0." timestamp="2026-03-10T01:34:19.108" classname="OSMTest" />
-    <testcase name="NoTagsFile" file="testsrc/OpenStreetMapTest.cpp" line="259" status="run" result="completed" time="0." timestamp="2026-03-10T01:34:19.108" classname="OSMTest" />
-    <testcase name="DuplicateIDFile" file="testsrc/OpenStreetMapTest.cpp" line="277" status="run" result="completed" time="0." timestamp="2026-03-10T01:34:19.109" classname="OSMTest" />
-    <testcase name="DirectionIssueFile" file="testsrc/OpenStreetMapTest.cpp" line="291" status="run" result="completed" time="0." timestamp="2026-03-10T01:34:19.109" classname="OSMTest" />
+<testsuites tests="15" failures="0" disabled="0" errors="0" time="0.001" timestamp="2026-03-11T03:48:32.081" name="AllTests">
+  <testsuite name="OSMTest" tests="15" failures="0" disabled="0" skipped="0" errors="0" time="0.001" timestamp="2026-03-11T03:48:32.081">
+    <testcase name="SimpleFiles" file="testsrc/OpenStreetMapTest.cpp" line="5" status="run" result="completed" time="0." timestamp="2026-03-11T03:48:32.081" classname="OSMTest" />
+    <testcase name="ObscureFiles" file="testsrc/OpenStreetMapTest.cpp" line="34" status="run" result="completed" time="0." timestamp="2026-03-11T03:48:32.082" classname="OSMTest" />
+    <testcase name="EmptyFiles" file="testsrc/OpenStreetMapTest.cpp" line="62" status="run" result="completed" time="0." timestamp="2026-03-11T03:48:32.082" classname="OSMTest" />
+    <testcase name="NoNodesOrWaysFile" file="testsrc/OpenStreetMapTest.cpp" line="77" status="run" result="completed" time="0." timestamp="2026-03-11T03:48:32.082" classname="OSMTest" />
+    <testcase name="NodesOnlyFile" file="testsrc/OpenStreetMapTest.cpp" line="92" status="run" result="completed" time="0." timestamp="2026-03-11T03:48:32.082" classname="OSMTest" />
+    <testcase name="WaysOnlyFile" file="testsrc/OpenStreetMapTest.cpp" line="122" status="run" result="completed" time="0." timestamp="2026-03-11T03:48:32.082" classname="OSMTest" />
+    <testcase name="DuplicateNodesFile" file="testsrc/OpenStreetMapTest.cpp" line="141" status="run" result="completed" time="0." timestamp="2026-03-11T03:48:32.082" classname="OSMTest" />
+    <testcase name="ExactValuesFile" file="testsrc/OpenStreetMapTest.cpp" line="157" status="run" result="completed" time="0." timestamp="2026-03-11T03:48:32.082" classname="OSMTest" />
+    <testcase name="LotsOfWhiteSpace" file="testsrc/OpenStreetMapTest.cpp" line="175" status="run" result="completed" time="0." timestamp="2026-03-11T03:48:32.082" classname="OSMTest" />
+    <testcase name="NodeAttributes" file="testsrc/OpenStreetMapTest.cpp" line="196" status="run" result="completed" time="0." timestamp="2026-03-11T03:48:32.082" classname="OSMTest" />
+    <testcase name="WayAttributes" file="testsrc/OpenStreetMapTest.cpp" line="216" status="run" result="completed" time="0." timestamp="2026-03-11T03:48:32.083" classname="OSMTest" />
+    <testcase name="SelfInteractFile" file="testsrc/OpenStreetMapTest.cpp" line="234" status="run" result="completed" time="0." timestamp="2026-03-11T03:48:32.083" classname="OSMTest" />
+    <testcase name="NoTagsFile" file="testsrc/OpenStreetMapTest.cpp" line="259" status="run" result="completed" time="0." timestamp="2026-03-11T03:48:32.083" classname="OSMTest" />
+    <testcase name="DuplicateIDFile" file="testsrc/OpenStreetMapTest.cpp" line="277" status="run" result="completed" time="0." timestamp="2026-03-11T03:48:32.083" classname="OSMTest" />
+    <testcase name="DirectionIssueFile" file="testsrc/OpenStreetMapTest.cpp" line="291" status="run" result="completed" time="0." timestamp="2026-03-11T03:48:32.083" classname="OSMTest" />
   </testsuite>
 </testsuites>
