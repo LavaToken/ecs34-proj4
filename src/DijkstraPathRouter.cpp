@@ -33,8 +33,11 @@ struct CDijkstraPathRouter::SImplementation{
         }
         return std::any();
     }
-
+    // Discussion code has some issues.. did not detect negative weight edges i think..
     bool AddEdge(TVertexID src, TVertexID dest, double weight, bool bidir = false) noexcept{
+        if(weight < 0){
+            return false;
+        }
         if(src < DVertices.size() && dest < DVertices.size()){
             DVertices[src]->DEdges.push_back(std::make_pair(weight,DVertices[dest]));
             if(bidir){
@@ -50,14 +53,72 @@ struct CDijkstraPathRouter::SImplementation{
     }
 
     double FindShortestPath(TVertexID src, TVertexID dest, std::vector<TVertexID> &path) noexcept{
-        std::vector<double> Weights;
+        std::vector<double> Weights; 
         Weights.resize(DVertices.size(),std::numeric_limits<double>::max());
         std::vector<TVertexID> Previous;
         Previous.resize(DVertices.size(),std::numeric_limits<TVertexID>::max());
+
+        if(src >= DVertices.size() || dest >= DVertices.size()){
+            return NoPathExists;
+        }
+
+        Weights[src] = 0;
+        Previous[src] = InvalidVertexID;
         
+        for(std::size_t i = 0; i < DVertices.size(); i++){
+            if(i != src){
+                Weights[i] = std::numeric_limits<double>::max(); // Infinity
+                Previous[i] = InvalidVertexID; // Invalid/Undefined
+            }
+        }
 
+        while(true){
+            TVertexID u = InvalidVertexID;
+            double minWeight = std::numeric_limits<double>::max();
+            for(std::size_t i = 0; i < DVertices.size(); i++){
+                if(Weights[i] < minWeight){
+                    minWeight = Weights[i];
+                    u = i;
+                }
+            }
+            if(u == InvalidVertexID){
+                break;
+            }
+            for(const auto &edge : DVertices[u]->DEdges){
+                // edge.second is a shared_ptr<SVertex>
+                auto it = std::find(DVertices.begin(), DVertices.end(), edge.second); // find its index in DVertices
+                if(it == DVertices.end()){
+                    continue;
+                }
+                TVertexID v = static_cast<TVertexID>(std::distance(DVertices.begin(), it));
+                double alt = Weights[u] + edge.first;
+                if(alt <= Weights[v]){
+                    Weights[v] = alt;
+                    Previous[v] = u;
+                }
+            }
+            if(u == dest){
+                break;
+            }
+            // Mark u as visited(infinity to prevent picked again)
+            Weights[u] = std::numeric_limits<double>::max();
+        }
 
-
+        // If destination impossible.
+        if(Weights[dest] == std::numeric_limits<double>::max()){
+            return NoPathExists;
+        }
+        // Non trivial, require that destination has a predecessor.
+        if(dest != src && Previous[dest] == InvalidVertexID){
+            return NoPathExists;
+        }
+        path.clear();
+        for(TVertexID v = dest; v != InvalidVertexID; v = Previous[v]){
+            path.push_back(v);
+        }
+        std::reverse(path.begin(), path.end());
+        return Weights[dest];
+        
     }
 };
 
@@ -65,8 +126,8 @@ CDijkstraPathRouter::CDijkstraPathRouter(){
     DImplementation = std::make_unique<SImplementation>();
 }
 
-CDijkstraPathRouter::~CDijkstraPathRouter(){
-
+CDijkstraPathRouter::~CDijkstraPathRouter(){ 
+    DImplementation.reset();
 }
 
 std::size_t CDijkstraPathRouter::VertexCount() const noexcept{

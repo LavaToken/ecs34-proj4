@@ -1,27 +1,27 @@
 #include "OpenStreetMap.h"
 #include <unordered_map>
-#include <vector>
 
 struct COpenStreetMap::SImplementation{
     const std::string DOSMTag = "osm";
     const std::string DNodeTag = "node";
+    const std::string DWayTag = "way";
+    const std::string DTagTag = "tag";
     const std::string DNodeIDAttr = "id";
     const std::string DNodeLatAttr = "lat";
     const std::string DNodeLonAttr = "lon";
-    const std::string DWayTag = "way";
     const std::string DWayIDAttr = "id";
-    const std::string DTagTag = "tag";
-    const std::string DTagKAttr = "k";
-    const std::string DTagVAttr = "v";
-    const std::string DWayNdTag = "nd";
-    const std::string DWayNdRefAttr = "ref";
+    const std::string DTagKeyAttr = "k";
+    const std::string DTagValueAttr = "v";
+    const std::string DWayNodeTag = "nd";
+    const std::string DWayNodeRefAttr = "ref";
 
     struct SNode: public CStreetMap::SNode{
         TNodeID DID;
         SLocation DLocation;
-        std::vector<std::pair<std::string, std::string>> DAttributes;
-        
-        ~SNode(){};
+        std::vector<std::string> DAttributeKeys;
+        std::unordered_map<std::string, std::string> DAttributes;
+
+        ~SNode() override{};
         TNodeID ID() const noexcept override{
             return DID;
         }
@@ -31,37 +31,36 @@ struct COpenStreetMap::SImplementation{
         }
 
         std::size_t AttributeCount() const noexcept override{
-            return DAttributes.size();
+            return DAttributeKeys.size();
         }
 
         std::string GetAttributeKey(std::size_t index) const noexcept override{
-            if (index < DAttributes.size()) {
-                return DAttributes[index].first;
+            if(index >= DAttributeKeys.size()){
+                return "";
             }
-            return "";
+            return DAttributeKeys[index];
         }
 
         bool HasAttribute(const std::string &key) const noexcept override{
-            for (const auto& attr : DAttributes) {
-                if (attr.first == key) return true;
-            }
-            return false;
+            return DAttributes.find(key) != DAttributes.end();
         }
 
         std::string GetAttribute(const std::string &key) const noexcept override{
-            for (const auto& attr : DAttributes) {
-                if (attr.first == key) return attr.second;
+            auto It = DAttributes.find(key);
+            if(It == DAttributes.end()){
+                return "";
             }
-            return "";
+            return It->second;
         }
     };
 
     struct SWay: public CStreetMap::SWay{
         TWayID DID;
         std::vector<TNodeID> DNodeIDs;
-        std::vector<std::pair<std::string, std::string>> DAttributes;
-        
-        ~SWay(){};
+        std::vector<std::string> DAttributeKeys;
+        std::unordered_map<std::string, std::string> DAttributes;
+
+        ~SWay() override{};
         TWayID ID() const noexcept override{
             return DID;
         }
@@ -71,35 +70,33 @@ struct COpenStreetMap::SImplementation{
         }
 
         TNodeID GetNodeID(std::size_t index) const noexcept override{
-            if (index < DNodeIDs.size()) {
-                return DNodeIDs[index];
+            if(index >= DNodeIDs.size()){
+                return InvalidNodeID;
             }
-            return CStreetMap::InvalidNodeID;
+            return DNodeIDs[index];
         }
 
         std::size_t AttributeCount() const noexcept override{
-            return DAttributes.size();
+            return DAttributeKeys.size();
         }
 
         std::string GetAttributeKey(std::size_t index) const noexcept override{
-            if (index < DAttributes.size()) {
-                return DAttributes[index].first;
+            if(index >= DAttributeKeys.size()){
+                return "";
             }
-            return "";
+            return DAttributeKeys[index];
         }
 
         bool HasAttribute(const std::string &key) const noexcept override{
-            for (const auto& attr : DAttributes) {
-                if (attr.first == key) return true;
-            }
-            return false;
+            return DAttributes.find(key) != DAttributes.end();
         }
 
         std::string GetAttribute(const std::string &key) const noexcept override{
-            for (const auto& attr : DAttributes) {
-                if (attr.first == key) return attr.second;
+            auto It = DAttributes.find(key);
+            if(It == DAttributes.end()){
+                return "";
             }
-            return "";
+            return It->second;
         }
     };
     std::vector<std::shared_ptr<SNode>> DNodesByIndex;
@@ -107,84 +104,113 @@ struct COpenStreetMap::SImplementation{
     std::vector<std::shared_ptr<SWay>> DWaysByIndex;
     std::unordered_map<TWayID,std::shared_ptr<SWay>> DWaysByID;
 
-    bool ParseOpenStreetMap(std::shared_ptr<CXMLReader> src){
+    void ParseTags(std::shared_ptr<CXMLReader> src, std::vector<std::string> &keys, std::unordered_map<std::string, std::string> &attrs, const std::string &parentTag){
+        SXMLEntity TempEntity;
+        while(src->ReadEntity(TempEntity)){ // read tags
+            if(TempEntity.DType == SXMLEntity::EType::StartElement && TempEntity.DNameData == DTagTag){ // tag start
+                std::string k = TempEntity.AttributeValue(DTagKeyAttr); // get the tag key
+                std::string v = TempEntity.AttributeValue(DTagValueAttr); // get the tag value
+                keys.push_back(k);
+                attrs[k] = v; // add the tag to the map
+            }
+            else if(TempEntity.DType == SXMLEntity::EType::EndElement && TempEntity.DNameData == parentTag){ // tag end
+                break; // break out of the loop
+            }
+        }
+    }
+
+    bool ParseNodes(std::shared_ptr<CXMLReader> src, SXMLEntity &nextentity){
+        if(nextentity.DType == SXMLEntity::EType::StartElement && nextentity.DNameData == DNodeTag){ // are we starting a node?
+            do {
+                if(nextentity.DType == SXMLEntity::EType::StartElement && nextentity.DNameData == DNodeTag){ // case 1 are we starting a node?
+                    auto NodeID = std::stoull(nextentity.AttributeValue(DNodeIDAttr)); // get the node id
+                    auto NodeLat = std::stod(nextentity.AttributeValue(DNodeLatAttr));
+                    auto NodeLon = std::stod(nextentity.AttributeValue(DNodeLonAttr));
+                    auto NewNode = std::make_shared<SNode>();
+                    NewNode->DID = NodeID;
+                    //NewNode->DLocation = std::make_pair(NodeLat,NodeLon);
+                    NewNode->DLocation = CStreetMap::SLocation(NodeLat,NodeLon);
+                    
+                    // Possible attributes (tags)
+                    SXMLEntity TagEntity;
+                    while(src->ReadEntity(TagEntity)){ // read tags
+                        if(TagEntity.DType == SXMLEntity::EType::StartElement && TagEntity.DNameData == DTagTag){ // tag start
+                            std::string k = TagEntity.AttributeValue(DTagKeyAttr); // get the tag key
+                            std::string v = TagEntity.AttributeValue(DTagValueAttr); // get the tag value
+                            NewNode->DAttributeKeys.push_back(k);
+                            NewNode->DAttributes[k] = v; // add the tag to the node
+                        }
+                        else if(TagEntity.DType == SXMLEntity::EType::EndElement && TagEntity.DNameData == DNodeTag){ // tag end
+                            break; // break out of the loop
+                        }
+                    }
+
+                    DNodesByIndex.push_back(NewNode);
+                    DNodesByID[NodeID] = NewNode;
+                }
+                else if(nextentity.DType == SXMLEntity::EType::StartElement && nextentity.DNameData == DWayTag){ // case 2 are we starting a way?
+                    return true; // Start of ways
+                }
+            } while(src->ReadEntity(nextentity)); // read next entity
+        }
+        return true;
+    }
+
+
+    bool ParseWays(std::shared_ptr<CXMLReader> src, SXMLEntity &nextentity){
+        while(nextentity.DType == SXMLEntity::EType::StartElement && nextentity.DNameData == DWayTag){
+            auto WayID = std::stoull(nextentity.AttributeValue(DWayIDAttr));
+            auto NewWay = std::make_shared<SWay>();
+            NewWay->DID = WayID;
+
+            while(src->ReadEntity(nextentity)){
+                if(nextentity.DType == SXMLEntity::EType::StartElement && nextentity.DNameData == DWayNodeTag){ // node ref
+                    NewWay->DNodeIDs.push_back(std::stoull(nextentity.AttributeValue(DWayNodeRefAttr)));
+                }
+                else if(nextentity.DType == SXMLEntity::EType::StartElement && nextentity.DNameData == DTagTag){ // tag
+                    std::string k = nextentity.AttributeValue(DTagKeyAttr);
+                    std::string v = nextentity.AttributeValue(DTagValueAttr);
+                    NewWay->DAttributeKeys.push_back(k);
+                    NewWay->DAttributes[k] = v;
+                }
+                else if(nextentity.DType == SXMLEntity::EType::EndElement && nextentity.DNameData == DWayTag){ // way end
+                    break;
+                }
+            }
+            DWaysByIndex.push_back(NewWay); // add way to index
+            DWaysByID[WayID] = NewWay; // add way to id map
+            if(!src->ReadEntity(nextentity)){ // read next entity
+                break;
+            }
+        }
+        return true;
+    }
+
+    bool ParseOpenStreetMap(std::shared_ptr<CXMLReader> src){ // combine parse nodes and parse ways
         SXMLEntity TempEntity;
         
-        if(src->ReadEntity(TempEntity)){
-            if((TempEntity.DType == SXMLEntity::EType::StartElement || TempEntity.DType == SXMLEntity::EType::CompleteElement) && TempEntity.DNameData == DOSMTag){
-                bool is_osm_complete = (TempEntity.DType == SXMLEntity::EType::CompleteElement);
-                if (is_osm_complete) {
-                    return true;
-                }
-                while (src->ReadEntity(TempEntity)) {
-                    if (TempEntity.DType == SXMLEntity::EType::EndElement && TempEntity.DNameData == DOSMTag) {
-                        break;
+        while(src->ReadEntity(TempEntity)){
+            if(TempEntity.DType == SXMLEntity::EType::StartElement && TempEntity.DNameData == DOSMTag){ // osm start
+                while(src->ReadEntity(TempEntity)){
+                    if(TempEntity.DType == SXMLEntity::EType::StartElement && TempEntity.DNameData == DNodeTag){// if node
+                        ParseNodes(src, TempEntity); // parse nodes
+                        // ParseNodes might have already consumed the start of ways in TempEntity
+                        ParseWays(src, TempEntity); // parse ways
                     }
-                    if (TempEntity.DType == SXMLEntity::EType::StartElement && TempEntity.DNameData == DNodeTag) {
-                        auto NodeID = std::stoull(TempEntity.AttributeValue(DNodeIDAttr));
-                        auto NodeLat = std::stod(TempEntity.AttributeValue(DNodeLatAttr));
-                        auto NodeLon = std::stod(TempEntity.AttributeValue(DNodeLonAttr));
-                        auto NewNode = std::make_shared<SNode>();
-                        NewNode->DID = NodeID;
-                        NewNode->DLocation = {NodeLat,NodeLon};
-                        DNodesByIndex.push_back(NewNode);
-                        DNodesByID[NodeID] = NewNode;
-                        while(src->ReadEntity(TempEntity)){
-                            if(TempEntity.DType == SXMLEntity::EType::EndElement && TempEntity.DNameData == DNodeTag){
-                                break;
-                            }
-                            if (TempEntity.DType == SXMLEntity::EType::CompleteElement && TempEntity.DNameData == DNodeTag) { // Some parsers might issue complete
-                                break;
-                            }
-                            if ((TempEntity.DType == SXMLEntity::EType::StartElement || TempEntity.DType == SXMLEntity::EType::CompleteElement) && TempEntity.DNameData == DTagTag) {
-                                NewNode->DAttributes.push_back({TempEntity.AttributeValue(DTagKAttr), TempEntity.AttributeValue(DTagVAttr)});
-                            }
-                        }
-                    } else if (TempEntity.DType == SXMLEntity::EType::CompleteElement && TempEntity.DNameData == DNodeTag) {
-                        auto NodeID = std::stoull(TempEntity.AttributeValue(DNodeIDAttr));
-                        auto NodeLat = std::stod(TempEntity.AttributeValue(DNodeLatAttr));
-                        auto NodeLon = std::stod(TempEntity.AttributeValue(DNodeLonAttr));
-                        auto NewNode = std::make_shared<SNode>();
-                        NewNode->DID = NodeID;
-                        NewNode->DLocation = {NodeLat,NodeLon};
-                        DNodesByIndex.push_back(NewNode);
-                        DNodesByID[NodeID] = NewNode;
-                    } else if (TempEntity.DType == SXMLEntity::EType::StartElement && TempEntity.DNameData == DWayTag) {
-                        auto WayID = std::stoull(TempEntity.AttributeValue(DWayIDAttr));
-                        auto NewWay = std::make_shared<SWay>();
-                        NewWay->DID = WayID;
-                        DWaysByIndex.push_back(NewWay);
-                        DWaysByID[WayID] = NewWay;
-                        while(src->ReadEntity(TempEntity)){
-                            if(TempEntity.DType == SXMLEntity::EType::EndElement && TempEntity.DNameData == DWayTag){
-                                break;
-                            }
-                            if ((TempEntity.DType == SXMLEntity::EType::StartElement || TempEntity.DType == SXMLEntity::EType::CompleteElement) && TempEntity.DNameData == DTagTag) {
-                                NewWay->DAttributes.push_back({TempEntity.AttributeValue(DTagKAttr), TempEntity.AttributeValue(DTagVAttr)});
-                            } else if ((TempEntity.DType == SXMLEntity::EType::StartElement || TempEntity.DType == SXMLEntity::EType::CompleteElement) && TempEntity.DNameData == DWayNdTag) {
-                                NewWay->DNodeIDs.push_back(std::stoull(TempEntity.AttributeValue(DWayNdRefAttr)));
-                            }
-                        }
-                    } else if (TempEntity.DType == SXMLEntity::EType::CompleteElement && TempEntity.DNameData == DWayTag) {
-                        auto WayID = std::stoull(TempEntity.AttributeValue(DWayIDAttr));
-                        auto NewWay = std::make_shared<SWay>();
-                        NewWay->DID = WayID;
-                        DWaysByIndex.push_back(NewWay);
-                        DWaysByID[WayID] = NewWay;
+                    else if(TempEntity.DType == SXMLEntity::EType::StartElement && TempEntity.DNameData == DWayTag){// if way
+                        ParseWays(src, TempEntity); // parse ways
+                    }
+                    else if(TempEntity.DType == SXMLEntity::EType::EndElement && TempEntity.DNameData == DOSMTag){// osm end
+                        return true;
                     }
                 }
-                return true;
-            } else if (TempEntity.DType == SXMLEntity::EType::CompleteElement && TempEntity.DNameData == DOSMTag) {
-                return true;
             }
         }
         return false;
     }
 
     SImplementation(std::shared_ptr<CXMLReader> src){
-        if(ParseOpenStreetMap(src)){
-
-        }
+        ParseOpenStreetMap(src);
     }
 
     std::size_t NodeCount() const noexcept{
@@ -196,36 +222,36 @@ struct COpenStreetMap::SImplementation{
     }
     
     std::shared_ptr<CStreetMap::SNode> NodeByIndex(std::size_t index) const noexcept{
-        if (index < DNodesByIndex.size()) {
-            return DNodesByIndex[index];
+        if(index >= DNodesByIndex.size()){
+            return nullptr;
         }
-        return nullptr;
+        return DNodesByIndex[index];
     }
     
-    std::shared_ptr<CStreetMap::SNode> NodeByID(TNodeID id) const noexcept{
-        auto it = DNodesByID.find(id);
-        if (it != DNodesByID.end()) {
-            return it->second;
+    std::shared_ptr<CStreetMap::SNode> NodeByID(TNodeID id) const noexcept{ // find node by id
+        auto It = DNodesByID.find(id); // find the node in the map
+        if(It == DNodesByID.end()){ // if the node is not found
+            return nullptr;
         }
-        return nullptr;
+        return It->second; // return the node
     }
     
     std::shared_ptr<CStreetMap::SWay> WayByIndex(std::size_t index) const noexcept{
-        if (index < DWaysByIndex.size()) {
-            return DWaysByIndex[index];
+        if(index >= DWaysByIndex.size()){ // if index is out of bounds
+            return nullptr;
         }
-        return nullptr;
+        return DWaysByIndex[index]; // return the way
     }
     
-    std::shared_ptr<CStreetMap::SWay> WayByID(TWayID id) const noexcept{
-        auto it = DWaysByID.find(id);
-        if (it != DWaysByID.end()) {
-            return it->second;
+    std::shared_ptr<CStreetMap::SWay> WayByID(TWayID id) const noexcept{ // find way by id
+        auto It = DWaysByID.find(id); // find the way in the map
+        if(It == DWaysByID.end()){
+            return nullptr; // if the way is not found
         }
-        return nullptr;
+        return It->second; // return the way
     }
 };
-
+    
 COpenStreetMap::COpenStreetMap(std::shared_ptr<CXMLReader> src){
     DImplementation = std::make_unique<SImplementation>(src);
 }
