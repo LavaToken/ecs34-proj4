@@ -65,7 +65,13 @@ struct CTransportationPlannerCommandLine::SImplementation{
                 std::string Line(Buffer.begin(), Buffer.end());
                 Buffer.clear();
 
-                auto Tokens = StringUtils::Split(Line, " \t\r");
+                std::stringstream ss(Line);
+                std::vector<std::string> Tokens;
+                std::string TempToken;
+                while (ss >> TempToken) {
+                    Tokens.push_back(TempToken);
+                }
+
                 if (!Tokens.empty() && !Tokens[0].empty()) {
                     auto Cmd = Tokens[0];
 
@@ -85,14 +91,31 @@ struct CTransportationPlannerCommandLine::SImplementation{
                                     auto Node = DPlanner->SortedNodeByIndex(index);
                                     if (Node) {
                                         auto Loc = Node->Location();
-                                        int lat_d = int(Loc.DLatitude);
-                                        int lat_m = int((Loc.DLatitude - lat_d) * 60.0);
-                                        int lat_s = int(std::round(((Loc.DLatitude - lat_d) * 60.0 - lat_m) * 60.0));
-                                        std::string lat_dir = "N"; 
+                                        int lat_d = int(std::abs(Loc.DLatitude));
+                                        int lat_m = int((std::abs(Loc.DLatitude) - lat_d) * 60.0);
+                                        int lat_s = int(std::round(((std::abs(Loc.DLatitude) - lat_d) * 60.0 - lat_m) * 60.0));
+                                        if (lat_s == 60) {
+                                            lat_m++;
+                                            lat_s = 0;
+                                        }
+                                        if (lat_m == 60) {
+                                            lat_d++;
+                                            lat_m = 0;
+                                        }
+                                        std::string lat_dir = Loc.DLatitude >= 0 ? "N" : "S";
+                                        
                                         int lon_d = int(std::abs(Loc.DLongitude));
                                         int lon_m = int((std::abs(Loc.DLongitude) - lon_d) * 60.0);
                                         int lon_s = int(std::round(((std::abs(Loc.DLongitude) - lon_d) * 60.0 - lon_m) * 60.0));
-                                        std::string lon_dir = "W"; 
+                                        if (lon_s == 60) {
+                                            lon_m++;
+                                            lon_s = 0;
+                                        }
+                                        if (lon_m == 60) {
+                                            lon_d++;
+                                            lon_m = 0;
+                                        }
+                                        std::string lon_dir = Loc.DLongitude >= 0 ? "E" : "W";
 
                                         std::string Out = "Node " + std::to_string(index) + ": id = " + std::to_string(Node->ID()) + 
                                                           " is at " + std::to_string(lat_d) + "d " + std::to_string(lat_m) + "' " + std::to_string(lat_s) + "\" " + lat_dir + 
@@ -127,11 +150,9 @@ struct CTransportationPlannerCommandLine::SImplementation{
                                 LastShortestSrc = src;
                                 LastShortestDest = dest;
 
-                                std::stringstream ss;
-                                ss << "Shortest path is ";
-                                ss << LastShortestDistance;
-                                ss << " mi.\n";
-                                std::string Out = ss.str();
+                                std::stringstream ss_out;
+                                ss_out << "Shortest path is " << LastShortestDistance << " mi.\n";
+                                std::string Out = ss_out.str();
                                 auto OutVec = std::vector<char>(Out.begin(), Out.end());
                                 DOutSink->Write(OutVec);
                             } catch (...) {
@@ -197,12 +218,12 @@ struct CTransportationPlannerCommandLine::SImplementation{
                                 }
                             }
                         } else if (LastWasShortest && !LastShortestPath.empty()) {
-                            std::vector<CTransportationPlanner::TTripStep> steps;
-                            for (auto nodeID : LastShortestPath) {
-                                steps.push_back({CTransportationPlanner::ETransportationMode::Walk, nodeID});
+                            std::vector<CTransportationPlanner::TTripStep> ShortestSteps;
+                            for(auto node : LastShortestPath){
+                                ShortestSteps.push_back({CTransportationPlanner::ETransportationMode::Walk, node});
                             }
                             std::vector<std::string> desc;
-                            if (DPlanner->GetPathDescription(steps, desc)) {
+                            if (DPlanner->GetPathDescription(ShortestSteps, desc)) {
                                 for(auto line : desc){
                                     std::string Out = line + "\n";
                                     auto OutVec = std::vector<char>(Out.begin(), Out.end());
@@ -216,24 +237,6 @@ struct CTransportationPlannerCommandLine::SImplementation{
                         }
                     } else if (Cmd == "save") {
                         if (LastWasFastest && !LastFastestPath.empty()) {
-                            std::ostringstream ss;
-                            ss << LastFastestTime << "hr.csv";
-                            std::string timeStr = ss.str();
-                            if (timeStr.find('.') != std::string::npos) {
-                                while(timeStr.back() == '0' && timeStr[timeStr.length()-2] != '.') {
-                                    timeStr.pop_back();
-                                }
-                                if (timeStr.find('.') + 7 > timeStr.size()) {
-                                    auto idx = timeStr.find("hr.csv");
-                                    std::string precision = timeStr.substr(0, idx);
-                                    if(precision.find('.') != std::string::npos) {
-                                        while(precision.length() - precision.find('.') - 1 < 6) {
-                                            precision += "0";
-                                        }
-                                        timeStr = precision + "hr.csv";
-                                    }
-                                }
-                            }
                             std::ostringstream fs;
                             fs << LastFastestSrc << "_" << LastFastestDest << "_" << std::fixed << std::setprecision(6) << LastFastestTime << "hr.csv";
                             
@@ -260,6 +263,7 @@ struct CTransportationPlannerCommandLine::SImplementation{
                         } else if (LastWasShortest && !LastShortestPath.empty()) {
                             std::ostringstream fs;
                             fs << LastShortestSrc << "_" << LastShortestDest << "_" << std::fixed << std::setprecision(6) << LastShortestDistance << "mi.csv";
+                            
                             std::string Filename = fs.str();
                             auto Sink = DResults->CreateSink(Filename);
                             if (Sink) {
@@ -295,7 +299,12 @@ struct CTransportationPlannerCommandLine::SImplementation{
         
         if (!Buffer.empty()) {
             std::string Line(Buffer.begin(), Buffer.end());
-            auto Tokens = StringUtils::Split(Line, " \t\r");
+            std::stringstream ss(Line);
+            std::vector<std::string> Tokens;
+            std::string TempToken;
+            while (ss >> TempToken) {
+                Tokens.push_back(TempToken);
+            }
             if (!Tokens.empty() && !Tokens[0].empty()) {
                 auto Cmd = Tokens[0];
                 if (Cmd == "exit") return true;

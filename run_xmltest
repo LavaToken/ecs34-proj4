@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="2" failures="0" disabled="0" errors="0" time="0.003" timestamp="2026-03-10T01:34:09.419" name="AllTests">
-  <testsuite name="XMLReader" tests="2" failures="0" disabled="0" skipped="0" errors="0" time="0.003" timestamp="2026-03-10T01:34:09.419">
-    <testcase name="SimpleTest" file="testsrc/XMLTest.cpp" line="5" status="run" result="completed" time="0.003" timestamp="2026-03-10T01:34:09.419" classname="XMLReader" />
-    <testcase name="CharDataTest" file="testsrc/XMLTest.cpp" line="21" status="run" result="completed" time="0." timestamp="2026-03-10T01:34:09.422" classname="XMLReader" />
+<testsuites tests="2" failures="0" disabled="0" errors="0" time="0." timestamp="2026-03-11T03:47:44.995" name="AllTests">
+  <testsuite name="XMLReader" tests="2" failures="0" disabled="0" skipped="0" errors="0" time="0." timestamp="2026-03-11T03:47:44.995">
+    <testcase name="SimpleTest" file="testsrc/XMLTest.cpp" line="5" status="run" result="completed" time="0." timestamp="2026-03-11T03:47:44.995" classname="XMLReader" />
+    <testcase name="CharDataTest" file="testsrc/XMLTest.cpp" line="21" status="run" result="completed" time="0." timestamp="2026-03-11T03:47:44.995" classname="XMLReader" />
   </testsuite>
 </testsuites>

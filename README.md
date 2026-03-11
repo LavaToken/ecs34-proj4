@@ -2,18 +2,20 @@
 
 Student 1: Kevin Jia (921898728)
 
-Student 2: Partner2 Name (123456987)
+Student 2: Yalamber Subba (923528180)
 
 ## Project Status
 This the current status of the project is complete for now
 
 ## Known Issues
-The project fails to function properly in DijkstraTransportationPlanner
+Kevin: The project fails to function properly in DijkstraTransportationPlanner
+Yalamber: One issue I ran into was dealing with transportation constraints, specifically with one way streets
 
 ## Code References
 * [Different ways to initialize variables](https://stackoverflow.com/questions/22543875/different-ways-to-initialize-variables)
 * [Dijkstra's Algorithm Explanation](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
 * [Dijkstra's with Priority Queue(just video reference example)](https://www.youtube.com/watch?v=CerlT7tTZfY)
+* [How to use gtest](https://github.com/google/googletest/blob/main/docs/primer.md)
 
 ## Generative AI Use
 I used ChatGPT for Prompt 1
