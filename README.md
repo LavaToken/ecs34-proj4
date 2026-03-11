@@ -2,17 +2,18 @@
 
 Student 1: Partner1 Name (123456789)
 
-Student 2: Partner2 Name (123456987)
+Student 2: Yalamber Subba (923528180)
 
 ## Project Status
 This the current status of the project ...
 
 ## Known Issues
-The project fails to function properly in ...
+Yalamber: One issue I ran into was dealing with transportation constraints, specifically with one way streets.  
 
 ## Code References
 * [Different ways to initialize variables](https://stackoverflow.com/questions/22543875/different-ways-to-initialize-variables)
-* [Some other link](https://stackoverflow.com)
+* [C++ Refernce](https://cplusplus.com/reference/)
+* [DSV Reference](https://www.partow.net/programming/dsvfilter/index.html)
 
 ## Generative AI Use
 I used ChatGPT for Prompt 1, and ZZZZZ for Prompt 2....
