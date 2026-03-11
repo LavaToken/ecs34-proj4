@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="1" failures="0" disabled="0" errors="0" time="0.004" timestamp="2026-03-11T01:07:41.132" name="AllTests">
+  <testsuite name="OSMTest" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="0.003" timestamp="2026-03-11T01:07:41.132">
+    <testcase name="SimpleFiles" file="testsrc/OpenStreetMapTest.cpp" line="5" status="run" result="completed" time="0.003" timestamp="2026-03-11T01:07:41.132" classname="OSMTest" />
+  </testsuite>
+</testsuites>
