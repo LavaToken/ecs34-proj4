@@ -127,7 +127,7 @@ CDijkstraPathRouter::CDijkstraPathRouter(){
 }
 
 CDijkstraPathRouter::~CDijkstraPathRouter(){ 
-
+    DImplementation.reset();
 }
 
 std::size_t CDijkstraPathRouter::VertexCount() const noexcept{
