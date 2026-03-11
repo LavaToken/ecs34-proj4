@@ -5,10 +5,10 @@ Student 1: Kevin Jia (921898728)
 Student 2: Partner2 Name (123456987)
 
 ## Project Status
-This the current status of the project work in progress
+This the current status of the project is complete for now
 
 ## Known Issues
-The project fails to function properly in ...
+The project fails to function properly in DijkstraTransportationPlanner
 
 ## Code References
 * [Different ways to initialize variables](https://stackoverflow.com/questions/22543875/different-ways-to-initialize-variables)
@@ -16,7 +16,7 @@ The project fails to function properly in ...
 * [Dijkstra's with Priority Queue(just video reference example)](https://www.youtube.com/watch?v=CerlT7tTZfY)
 
 ## Generative AI Use
-I used ChatGPT for Prompt 1, and ZZZZZ for Prompt 2....
+I used ChatGPT for Prompt 1
 
 ### Prompt 1
 in an implementation of dijkstra's algorithm what are some common test cases.
